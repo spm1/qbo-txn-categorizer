@@ -1,20 +1,14 @@
-
-@Client({
-    transport: Transport.KAFKA,
-    options: {
-      client: {
-        clientId: 'hero',
-        brokers: ['localhost:9092'],
-      },
-      consumer: {
-        groupId: 'hero-consumer'
-      }
-    }
-  })
-  client: ClientKafka;
+import { Controller } from '@nestjs/common';
+import { EventPattern, Payload, Ctx, KafkaContext } from '@nestjs/microservices';
   
 
 @Controller
 export class catClassLocation {
-    @MessagePattern()
+
+    constructor(private invoiceRetriever: InvoiceRetrieval) {}
+
+    @EventPattern('invoice.created')
+    handle(@Payload() data: any) {
+      invoiceData = this.invoiceRetriever.call(data)
+    }
 }
