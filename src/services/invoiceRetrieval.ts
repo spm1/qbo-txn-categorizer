@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common"
 import { QboFactory } from "../factories/qbo.factory"
 import { PreProcessedQboInvoice } from "../interfaces/qbo.interface"
+import { InvoiceReadSchema } from "../types/qbo-api-response"
 
 @Injectable
 export class InvoiceRetrieval {
@@ -8,8 +9,8 @@ export class InvoiceRetrieval {
     private eventData: any
     
     //configures instance variables for reuse
-    constructor(private qbo: QboFactory) {
-        this.qbo = this.qbo.getInstance()
+    constructor(qbo: QboFactory) {
+        this.qbo = qbo.getInstance()
     }
 
     //authenticate to QBO
@@ -22,7 +23,7 @@ export class InvoiceRetrieval {
 
     /* build request, make request*/
     call(data: PreProcessedQboInvoice): any {
-        this.prepareBody()
+        this.prepareBody(data)
         const rawInvoice = this.qbo.getInvoice(this.eventData, function(err, inv) {
             if (err) {
                 console.error("", err)
@@ -34,7 +35,8 @@ export class InvoiceRetrieval {
     }
 
     private handleResponse(resData: any): any {
-        return JSON.parse(resData)
+        const rawData = JSON.parse(resData)
+        return InvoiceReadSchema.parse(rawData)
     }
 
 }
