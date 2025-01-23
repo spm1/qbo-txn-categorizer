@@ -20,3 +20,6 @@ const LocationAddressSchema = z.string().transform((v) => {
     }
     throw new Error(`${v} is not a valid building code!`)
 })
+
+export const LeasedLocationCode = z.enum([])
+export const LicensedLocationCode = z.enum([])
