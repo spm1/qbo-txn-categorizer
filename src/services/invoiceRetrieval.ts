@@ -5,11 +5,10 @@ import { InvoiceReadSchema } from "../types/qbo-api-response"
 
 @Injectable
 export class InvoiceRetrieval {
-    private qbo: QboFactory
     private eventData: any
     
     //configures instance variables for reuse
-    constructor(qbo: QboFactory) {
+    constructor(private qbo: QboFactory) {
         this.qbo = qbo.getInstance()
     }
 

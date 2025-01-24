@@ -1,14 +1,30 @@
 import { Injectable } from "@nestjs/common"
-import { LeasedLocationCode, LicensedLocationCode } from "../types/ts-location"
+import { LeasedLocationId, LicensedLocationId, LocationClassNameMap, LocationClassNameSchema, LocationIdSchema } from "../types/ts-location"
 import { InvoiceLine, InvoiceLineSalesItemRefValueSchema } from "../types/qbo-api-response"
-import { FulfillmentProductItemRefValue, SpaceProductItemRefValue } from "../types/ts-product-cat"
+import { CapitalProductItemRefValue, 
+    ForkliftLabourProductItemRefValue, 
+    FulfillmentProductItemRefValue, 
+    MoveOutProductItemRefValue, 
+    ProductClassNameMap, 
+    ProductClassNameSchema, 
+    ProductClassValueMap, 
+    RebilledLabourProductItemRefValue, 
+    SpaceProductClassValueMap, 
+    SpaceProductItemRefValue, 
+    SpaceProductUnknownClassValue, 
+    UnknownClassValue } from "../types/ts-product-cat"
 
+    /* Determines QBO Invoice Line Class */
+@Injectable
 export class InvoiceLineClassFind {
     private locationId: string
     private line: InvoiceLine
     private itemRefValue: string
+    private classValue: any
+    private processedLine: InvoiceLine
 
     constructor(
+        locationId: string,
         line: InvoiceLine
     ) {}
 
@@ -17,19 +33,36 @@ export class InvoiceLineClassFind {
     }
 
     translateTarget() {
-        if (SpaceProductItemRefValue.safeParse(this.itemRefValue).success) {
-            if (LeasedLocationCode.safeParse(this.itemRefValue).success) {
+        const className = ProductClassNameMap[this.itemRefValue]
+        
+        if (ProductClassNameSchema.safeParse(className).success) {
 
-            } else if (LicensedLocationCode.safeParse(this.itemRefValue).success) {
+            if (className == "SpaceProduct") {
+                
+                if (LocationIdSchema.safeParse(this.locationId).success) {
+
+                    const locationClassName = LocationClassNameMap[this.locationId]
+                    if (LocationClassNameSchema.safeParse(locationClassName).success) {
+                        this.classValue = SpaceProductClassValueMap[locationClassName]
+                    }
+
+                } else {
+                    this.classValue = SpaceProductUnknownClassValue
+                }
 
             } else {
-
+                this.classValue = ProductClassValueMap[className]
             }
-        } else if (FulfillmentProductItemRefValue.safeParse(this.itemRefValue).success) {
 
-        } else if () {
-            
+        } else {
+            this.classValue = UnknownClassValue
         }
+    }
+
+    call(): string {
+        this.extractTarget()
+        this.translateTarget()
+        return this.classValue
     }
 
 

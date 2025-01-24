@@ -21,5 +21,20 @@ const LocationAddressSchema = z.string().transform((v) => {
     throw new Error(`${v} is not a valid building code!`)
 })
 
-export const LeasedLocationCode = z.enum([])
-export const LicensedLocationCode = z.enum([])
+export const LeasedLocationId = z.enum([])
+export const LicensedLocationId = z.enum([])
+export const LocationIdSchema = z.union([LeasedLocationCode, LicensedLocationCode])
+
+export type LocationId = z.infer<typeof LocationIdSchema>
+
+export const LocationClassNameMap: Record<string, string> = {}
+
+for (const v of LeasedLocationId.options) {
+    LocationClassNameMap[v] = "Leased"
+}
+
+for (const v of LicensedLocationId.options) {
+    LocationClassNameMap[v] = "Licensed"
+}
+
+export const LocationClassNameSchema = z.enum(["Leased", "Licensed"])
